@@ -7,9 +7,12 @@ import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as DocumentPicker from 'expo-document-picker';
-import { PieChart, LineChart } from 'react-native-chart-kit';
-import { getCategoryBreakdown, getMonthlyTrend, getMonthlySummary } from '../db/database';
-import { formatCurrency, currentMonth, monthLabel } from '../utils/helpers';
+import { PieChart, LineChart, BarChart } from 'react-native-chart-kit';
+import {
+  getCategoryBreakdown, getMonthlyTrend, getMonthlySummary,
+  getLastMonthSummary, getCategoryTrend,
+} from '../db/database';
+import { formatCurrency, currentMonth, monthLabel, offsetMonth } from '../utils/helpers';
 import { THEME, CATEGORY_COLORS } from '../utils/constants';
 import { exportAsCSV, exportAsJSON, importFromJSON } from '../utils/exportData';
 import { useAppContext } from '../utils/AppContext';
@@ -28,6 +31,32 @@ const CHART_CONFIG = {
   propsForBackgroundLines: { stroke: '#F3F4F6' },
 };
 
+const BAR_CHART_CONFIG = {
+  ...CHART_CONFIG,
+  barPercentage: 0.6,
+  fillShadowGradient: THEME.primary,
+  fillShadowGradientOpacity: 1,
+};
+
+function DeltaArrow({ curr, prev, higherIsGood = true }) {
+  if (!prev || prev === 0) return null;
+  const delta = Math.round(((curr - prev) / prev) * 100);
+  const isUp = delta >= 0;
+  const isGood = higherIsGood ? isUp : !isUp;
+  return (
+    <View style={[compStyles.deltaBadge, { backgroundColor: isGood ? '#DCFCE7' : '#FEE2E2' }]}>
+      <Text style={[compStyles.deltaText, { color: isGood ? '#15803D' : '#B91C1C' }]}>
+        {isUp ? '↑' : '↓'} {Math.abs(delta)}%
+      </Text>
+    </View>
+  );
+}
+
+const compStyles = StyleSheet.create({
+  deltaBadge: { borderRadius: 10, paddingHorizontal: 7, paddingVertical: 2 },
+  deltaText: { fontSize: 11, fontWeight: '700' },
+});
+
 export default function ReportsScreen() {
   const { triggerRefresh } = useAppContext();
   const [exporting, setExporting] = useState(false);
@@ -36,20 +65,26 @@ export default function ReportsScreen() {
   const [loading, setLoading] = useState(true);
   const [breakdown, setBreakdown] = useState([]);
   const [trend, setTrend] = useState([]);
+  const [categoryTrend, setCategoryTrend] = useState([]);
   const [summary, setSummary] = useState({ income: 0, expense: 0, balance: 0 });
+  const [lastSummary, setLastSummary] = useState({ income: 0, expense: 0, balance: 0 });
   const [refreshing, setRefreshing] = useState(false);
   const month = currentMonth();
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [b, t, s] = await Promise.all([
+    const [b, t, s, ls, ct] = await Promise.all([
       getCategoryBreakdown(month),
       getMonthlyTrend(6),
       getMonthlySummary(month),
+      getLastMonthSummary(month),
+      getCategoryTrend(4),
     ]);
     setBreakdown(b);
     setTrend(t);
     setSummary(s);
+    setLastSummary(ls);
+    setCategoryTrend(ct);
     setLoading(false);
   }, [month]);
 
@@ -95,8 +130,44 @@ export default function ReportsScreen() {
     };
   };
 
+  const buildCategoryTrendData = () => {
+    const months = [...new Set(categoryTrend.map(r => r.month))].slice(-4);
+    if (months.length === 0) return null;
+
+    // Pick top 4 categories by total spend
+    const catTotals = {};
+    categoryTrend.forEach(r => {
+      catTotals[r.category] = (catTotals[r.category] || 0) + r.total;
+    });
+    const top4 = Object.entries(catTotals)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 4)
+      .map(e => e[0]);
+
+    if (top4.length === 0) return null;
+
+    // Build bar data — one "dataset" per category, bars grouped by month
+    // react-native-chart-kit BarChart only supports one dataset, so we flatten:
+    // Show one category at a time: use the top category's monthly data
+    const primaryCat = top4[0];
+    const data = months.map(m => {
+      const row = categoryTrend.find(r => r.month === m && r.category === primaryCat);
+      return row ? row.total : 0;
+    });
+
+    const labels = months.map(m => {
+      const [, mo] = m.split('-');
+      return new Date(2024, parseInt(mo) - 1).toLocaleDateString('en-US', { month: 'short' });
+    });
+
+    return { labels, data, topCategories: top4, months };
+  };
+
   const lineData = buildLineData();
+  const categoryTrendData = buildCategoryTrendData();
   const savingsRate = summary.income > 0 ? Math.round((summary.balance / summary.income) * 100) : 0;
+  const lastSavingsRate = lastSummary.income > 0 ? Math.round((lastSummary.balance / lastSummary.income) * 100) : 0;
+  const prevMonthLabel = monthLabel(offsetMonth(month, -1));
 
   const handleExportCSV = async () => {
     setExporting(true);
@@ -195,6 +266,54 @@ export default function ReportsScreen() {
       </LinearGradient>
 
       <View style={styles.content}>
+
+        {/* Month Comparison Card */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Month Comparison</Text>
+          {loading ? (
+            <View style={styles.empty}><ActivityIndicator color={THEME.primary} /></View>
+          ) : (
+            <>
+              <View style={styles.compRow}>
+                <View style={styles.compHeader}>
+                  <Text style={styles.compLabel} numberOfLines={1}></Text>
+                </View>
+                <View style={styles.compHeader}>
+                  <Text style={styles.compColLabel} numberOfLines={1}>{prevMonthLabel.split(' ')[0]}</Text>
+                </View>
+                <View style={styles.compHeader}>
+                  <Text style={styles.compColLabel} numberOfLines={1}>{monthLabel(month).split(' ')[0]}</Text>
+                </View>
+                <View style={styles.compHeader}>
+                  <Text style={styles.compColLabel}>Change</Text>
+                </View>
+              </View>
+
+              <View style={[styles.compRow, { backgroundColor: '#F0FDF4', borderRadius: 10 }]}>
+                <View style={styles.compCell}><Text style={styles.compMetric}>Income</Text></View>
+                <View style={styles.compCell}><Text style={styles.compValueSub}>{formatCurrency(lastSummary.income)}</Text></View>
+                <View style={styles.compCell}><Text style={[styles.compValue, { color: '#15803D' }]}>{formatCurrency(summary.income)}</Text></View>
+                <View style={styles.compCell}><DeltaArrow curr={summary.income} prev={lastSummary.income} higherIsGood={true} /></View>
+              </View>
+
+              <View style={[styles.compRow, { backgroundColor: '#FFF1F2', borderRadius: 10, marginTop: 4 }]}>
+                <View style={styles.compCell}><Text style={styles.compMetric}>Expenses</Text></View>
+                <View style={styles.compCell}><Text style={styles.compValueSub}>{formatCurrency(lastSummary.expense)}</Text></View>
+                <View style={styles.compCell}><Text style={[styles.compValue, { color: '#B91C1C' }]}>{formatCurrency(summary.expense)}</Text></View>
+                <View style={styles.compCell}><DeltaArrow curr={summary.expense} prev={lastSummary.expense} higherIsGood={false} /></View>
+              </View>
+
+              <View style={[styles.compRow, { backgroundColor: '#F0F9FF', borderRadius: 10, marginTop: 4 }]}>
+                <View style={styles.compCell}><Text style={styles.compMetric}>Savings%</Text></View>
+                <View style={styles.compCell}><Text style={styles.compValueSub}>{lastSavingsRate}%</Text></View>
+                <View style={styles.compCell}><Text style={[styles.compValue, { color: THEME.primary }]}>{savingsRate}%</Text></View>
+                <View style={styles.compCell}><DeltaArrow curr={savingsRate} prev={lastSavingsRate} higherIsGood={true} /></View>
+              </View>
+            </>
+          )}
+        </View>
+
+        {/* Spending by Category */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Spending by Category</Text>
           {loading ? (
@@ -242,6 +361,7 @@ export default function ReportsScreen() {
           )}
         </View>
 
+        {/* 6-Month Trend */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>6-Month Trend</Text>
           {loading ? (
@@ -282,6 +402,54 @@ export default function ReportsScreen() {
             </>
           )}
         </View>
+
+        {/* Category Trends */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Category Trends</Text>
+          {loading ? (
+            <View style={styles.empty}>
+              <ActivityIndicator color={THEME.primary} />
+              <Text style={[styles.emptyText, { marginTop: 8 }]}>Loading…</Text>
+            </View>
+          ) : !categoryTrendData ? (
+            <View style={styles.empty}>
+              <Text style={styles.emptyEmoji}>📉</Text>
+              <Text style={styles.emptyText}>Not enough category data yet</Text>
+            </View>
+          ) : (
+            <>
+              <Text style={styles.catTrendSub}>
+                Top category: {categoryTrendData.topCategories[0]}
+              </Text>
+              <BarChart
+                data={{
+                  labels: categoryTrendData.labels,
+                  datasets: [{ data: categoryTrendData.data.map(v => Math.max(v, 0)) }],
+                }}
+                width={WIDTH - 32}
+                height={180}
+                chartConfig={BAR_CHART_CONFIG}
+                fromZero
+                showValuesOnTopOfBars={false}
+                style={styles.chart}
+              />
+              <View style={styles.catTrendList}>
+                {categoryTrendData.topCategories.map((cat, i) => {
+                  const total = categoryTrend.filter(r => r.category === cat).reduce((s, r) => s + r.total, 0);
+                  return (
+                    <View key={cat} style={styles.catTrendRow}>
+                      <View style={[styles.dot, { backgroundColor: CATEGORY_COLORS[cat] || '#B0B0B0' }]} />
+                      <Text style={styles.breakdownEmoji}>{CATEGORY_EMOJI[cat] || '•'}</Text>
+                      <Text style={styles.breakdownCat}>{cat}</Text>
+                      <Text style={styles.breakdownAmt}>{formatCurrency(total)}</Text>
+                    </View>
+                  );
+                })}
+              </View>
+            </>
+          )}
+        </View>
+
       </View>
     </ScrollView>
     </SafeAreaView>
@@ -329,4 +497,17 @@ const styles = StyleSheet.create({
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   legendDot: { width: 10, height: 10, borderRadius: 5 },
   legendText: { fontSize: 13, color: THEME.textSecondary, fontWeight: '500' },
+  // Month comparison
+  compRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 6, paddingHorizontal: 8 },
+  compHeader: { flex: 1, alignItems: 'center' },
+  compCell: { flex: 1, alignItems: 'center' },
+  compLabel: { fontSize: 11, color: THEME.textSecondary, fontWeight: '600' },
+  compColLabel: { fontSize: 12, fontWeight: '700', color: THEME.textSecondary },
+  compMetric: { fontSize: 13, fontWeight: '700', color: THEME.textPrimary },
+  compValue: { fontSize: 13, fontWeight: '800' },
+  compValueSub: { fontSize: 12, color: THEME.textSecondary, fontWeight: '600' },
+  // Category trend
+  catTrendSub: { fontSize: 12, color: THEME.textSecondary, marginBottom: 8, fontWeight: '600' },
+  catTrendList: { marginTop: 12, gap: 8 },
+  catTrendRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
 });

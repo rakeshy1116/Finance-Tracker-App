@@ -18,6 +18,8 @@ import TransactionsScreen from './src/screens/TransactionsScreen';
 import AddTransactionScreen from './src/screens/AddTransactionScreen';
 import BudgetsScreen from './src/screens/BudgetsScreen';
 import ReportsScreen from './src/screens/ReportsScreen';
+import SavingsGoalsScreen from './src/screens/SavingsGoalsScreen';
+import ManageCategoriesScreen from './src/screens/ManageCategoriesScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -26,6 +28,7 @@ const TABS = [
   { name: 'Dashboard',     icon: '🏠', label: 'Home' },
   { name: 'Transactions',  icon: '📋', label: 'History' },
   { name: 'Budgets',       icon: '🎯', label: 'Budgets' },
+  { name: 'Goals',         icon: '⭐', label: 'Goals' },
   { name: 'Reports',       icon: '📊', label: 'Reports' },
 ];
 
@@ -78,6 +81,7 @@ function MainTabs() {
           tab.name === 'Dashboard'    ? DashboardScreen    :
           tab.name === 'Transactions' ? TransactionsScreen :
           tab.name === 'Budgets'      ? BudgetsScreen      :
+          tab.name === 'Goals'        ? SavingsGoalsScreen :
           ReportsScreen
         } />
       ))}
@@ -124,6 +128,14 @@ export default function App() {
                 headerTitleStyle: { color: THEME.textPrimary, fontWeight: '700' },
               })}
             />
+            <Stack.Screen
+              name="ManageCategories"
+              component={ManageCategoriesScreen}
+              options={{
+                headerShown: false,
+                presentation: 'modal',
+              }}
+            />
           </Stack.Navigator>
         </NavigationContainer>
       </AppProvider>
@@ -139,14 +151,14 @@ const styles = StyleSheet.create({
 
   // Floating tab bar
   tabBarOuter: {
-    position: 'absolute', left: 20, right: 20,
+    position: 'absolute', left: 16, right: 16,
   },
   tabBarInner: {
     flexDirection: 'row',
     backgroundColor: '#FFFFFF',
     borderRadius: 28,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
     shadowColor: '#0D9488',
     shadowOpacity: 0.18,
     shadowOffset: { width: 0, height: 8 },
@@ -158,9 +170,9 @@ const styles = StyleSheet.create({
     paddingVertical: 4, borderRadius: 20, gap: 2, position: 'relative',
   },
   tabPill: {
-    position: 'absolute', top: 0, left: 8, right: 8, bottom: 0,
+    position: 'absolute', top: 0, left: 4, right: 4, bottom: 0,
     backgroundColor: '#CCFBF1', borderRadius: 16,
   },
-  tabIcon: { fontSize: 20 },
-  tabLabel: { fontSize: 10, letterSpacing: 0.2 },
+  tabIcon: { fontSize: 18 },
+  tabLabel: { fontSize: 9, letterSpacing: 0.1 },
 });

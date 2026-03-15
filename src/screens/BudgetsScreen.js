@@ -272,35 +272,3 @@ const styles = StyleSheet.create({
   saveBtnGradient: { paddingVertical: 14, alignItems: 'center' },
   saveBtnText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
 });
- sheet: {
-    backgroundColor: THEME.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28,
-    padding: 24, paddingBottom: 36,
-  },
-  sheetHandle: { width: 40, height: 4, backgroundColor: '#E5E7EB', borderRadius: 2, alignSelf: 'center', marginBottom: 20 },
-  sheetTitle: { fontSize: 22, fontWeight: '800', color: THEME.textPrimary, marginBottom: 20 },
-  sheetLabel: { fontSize: 13, fontWeight: '700', color: THEME.textSecondary, marginBottom: 10, letterSpacing: 0.3 },
-  catScroll: { marginBottom: 20 },
-  catChip: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    paddingHorizontal: 14, paddingVertical: 8, borderRadius: 14, marginRight: 8,
-    backgroundColor: '#F3F4F6', borderWidth: 1.5, borderColor: 'transparent',
-  },
-  catChipActive: { backgroundColor: '#CCFBF1', borderColor: THEME.primary },
-  catChipText: { fontSize: 13, color: THEME.textSecondary, fontWeight: '500' },
-  catChipTextActive: { color: THEME.primary, fontWeight: '700' },
-  amountInputWrap: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: '#F9FAFB',
-    borderRadius: 14, borderWidth: 1.5, borderColor: '#E5E7EB', paddingHorizontal: 16, marginBottom: 24,
-  },
-  dollarSign: { fontSize: 24, fontWeight: '700', color: THEME.textSecondary, marginRight: 4 },
-  amountField: { flex: 1, fontSize: 32, fontWeight: '800', color: THEME.textPrimary, paddingVertical: 14 },
-  sheetBtns: { flexDirection: 'row', gap: 12 },
-  cancelBtn: {
-    flex: 1, paddingVertical: 14, borderRadius: 14, alignItems: 'center',
-    backgroundColor: '#F3F4F6',
-  },
-  cancelText: { fontSize: 15, fontWeight: '700', color: THEME.textSecondary },
-  saveBtn: { flex: 1, borderRadius: 14, overflow: 'hidden' },
-  saveBtnGradient: { paddingVertical: 14, alignItems: 'center' },
-  saveBtnText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
-});

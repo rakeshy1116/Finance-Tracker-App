@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
   ScrollView, Alert, KeyboardAvoidingView, Platform, Switch,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { LinearGradient } from 'expo-linear-gradient';
-import { addTransaction, updateTransaction } from '../db/database';
+import { addTransaction, updateTransaction, getCustomCategories, getAccounts } from '../db/database';
 import { CATEGORIES, INCOME_CATEGORIES, THEME } from '../utils/constants';
 import { todayISO } from '../utils/helpers';
 import { useAppContext } from '../utils/AppContext';
-import { CATEGORY_EMOJI } from '../components/CategoryIcon';
+import { CATEGORY_EMOJI, customEmojiMap, customColorMap } from '../components/CategoryIcon';
 
 export default function AddTransactionScreen({ navigation, route }) {
   const { triggerRefresh } = useAppContext();
@@ -26,9 +26,32 @@ export default function AddTransactionScreen({ navigation, route }) {
   const [recurring, setRecurring] = useState(editTxn?.recurring === 1);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [customCategories, setCustomCategories] = useState([]);
+  const [accounts, setAccounts] = useState([]);
+  const [selectedAccount, setSelectedAccount] = useState(editTxn?.account_id || 1);
 
-  const categories = type === 'expense' ? CATEGORIES : INCOME_CATEGORIES;
   const isExpense = type === 'expense';
+
+  useEffect(() => {
+    getCustomCategories().then(setCustomCategories);
+    getAccounts().then(accs => {
+      setAccounts(accs);
+      if (!editTxn && accs.length > 0) {
+        setSelectedAccount(accs[0].id);
+      }
+    });
+  }, []);
+
+  const builtinCategories = type === 'expense' ? CATEGORIES : INCOME_CATEGORIES;
+  const filteredCustom = customCategories.filter(c => c.type === type);
+  const allCategories = [
+    ...builtinCategories.map(name => ({ name, isCustom: false })),
+    ...filteredCustom.map(c => ({ name: c.name, isCustom: true, emoji: c.emoji, color: c.color })),
+  ];
+
+  const getCatEmoji = (cat) => {
+    return customEmojiMap[cat.name] || cat.emoji || CATEGORY_EMOJI[cat.name] || '•';
+  };
 
   const onDateChange = (event, selectedDate) => {
     if (Platform.OS === 'android') {
@@ -50,7 +73,10 @@ export default function AddTransactionScreen({ navigation, route }) {
     }
     setSaving(true);
     try {
-      const payload = { type, amount: parseFloat(amount), category, description, date, recurring };
+      const payload = {
+        type, amount: parseFloat(amount), category, description, date, recurring,
+        account_id: selectedAccount || 1,
+      };
       if (isEditing) {
         await updateTransaction({ id: editTxn.id, ...payload });
       } else {
@@ -115,6 +141,30 @@ export default function AddTransactionScreen({ navigation, route }) {
         </LinearGradient>
 
         <View style={styles.body}>
+
+          {/* Account Selector */}
+          {accounts.length > 0 && (
+            <View style={styles.field}>
+              <Text style={styles.fieldLabel}>🏦  Account</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View style={styles.accountRow}>
+                  {accounts.map(acc => (
+                    <TouchableOpacity
+                      key={acc.id}
+                      style={[styles.accountChip, selectedAccount === acc.id && styles.accountChipActive]}
+                      onPress={() => setSelectedAccount(acc.id)}
+                    >
+                      <Text style={styles.accountChipIcon}>{acc.icon}</Text>
+                      <Text style={[styles.accountChipText, selectedAccount === acc.id && styles.accountChipTextActive]}>
+                        {acc.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
+            </View>
+          )}
+
           {/* Date Picker */}
           <View style={styles.field}>
             <Text style={styles.fieldLabel}>📅  Date</Text>
@@ -167,16 +217,23 @@ export default function AddTransactionScreen({ navigation, route }) {
           <View style={styles.field}>
             <Text style={styles.fieldLabel}>🏷️  Category</Text>
             <View style={styles.categoryGrid}>
-              {categories.map(cat => (
+              {allCategories.map(cat => (
                 <TouchableOpacity
-                  key={cat}
-                  style={[styles.catChip, category === cat && styles.catChipActive]}
-                  onPress={() => setCategory(cat)}
+                  key={cat.name}
+                  style={[styles.catChip, category === cat.name && styles.catChipActive]}
+                  onPress={() => setCategory(cat.name)}
                 >
-                  <Text style={styles.catEmoji}>{CATEGORY_EMOJI[cat] || '•'}</Text>
-                  <Text style={[styles.catLabel, category === cat && styles.catLabelActive]}>{cat}</Text>
+                  <Text style={styles.catEmoji}>{getCatEmoji(cat)}</Text>
+                  <Text style={[styles.catLabel, category === cat.name && styles.catLabelActive]}>{cat.name}</Text>
                 </TouchableOpacity>
               ))}
+              <TouchableOpacity
+                style={styles.manageCatChip}
+                onPress={() => navigation.navigate('ManageCategories')}
+              >
+                <Text style={styles.catEmoji}>⚙️</Text>
+                <Text style={styles.manageCatLabel}>Manage</Text>
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -231,6 +288,16 @@ const styles = StyleSheet.create({
     backgroundColor: THEME.primary, borderRadius: 10,
   },
   doneBtnText: { color: '#FFFFFF', fontWeight: '700', fontSize: 14 },
+  accountRow: { flexDirection: 'row', gap: 8 },
+  accountChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: 14, paddingVertical: 9, borderRadius: 14,
+    backgroundColor: THEME.surface, borderWidth: 1.5, borderColor: '#E5E7EB',
+  },
+  accountChipActive: { backgroundColor: '#CCFBF1', borderColor: THEME.primary },
+  accountChipIcon: { fontSize: 16 },
+  accountChipText: { fontSize: 13, color: THEME.textSecondary, fontWeight: '500' },
+  accountChipTextActive: { color: THEME.primary, fontWeight: '700' },
   switchRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     backgroundColor: THEME.surface, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12,
@@ -247,6 +314,12 @@ const styles = StyleSheet.create({
   catEmoji: { fontSize: 14 },
   catLabel: { fontSize: 12, color: THEME.textSecondary, fontWeight: '500' },
   catLabelActive: { color: THEME.primary, fontWeight: '700' },
+  manageCatChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12,
+    backgroundColor: '#F3F4F6', borderWidth: 1.5, borderColor: '#E5E7EB',
+  },
+  manageCatLabel: { fontSize: 12, color: THEME.textSecondary, fontWeight: '700' },
   saveBtn: { borderRadius: 16, overflow: 'hidden', marginTop: 8 },
   saveBtnGradient: { paddingVertical: 16, alignItems: 'center' },
   saveBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },

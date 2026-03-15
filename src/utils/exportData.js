@@ -1,6 +1,6 @@
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
-import { getTransactions, getAllTransactionsForExport, getAllBudgetsForExport, importFromBackup } from '../db/database';
+import { getAllTransactionsForExport, getAllBudgetsForExport, importFromBackup } from '../db/database';
 
 function escapeCSV(value) {
   if (value === null || value === undefined) return '';
@@ -12,7 +12,7 @@ function escapeCSV(value) {
 }
 
 export async function exportAsCSV() {
-  const transactions = await getTransactions();
+  const transactions = await getAllTransactionsForExport();
 
   const headers = ['Date', 'Type', 'Category', 'Description', 'Amount (USD)', 'Recurring'];
   const rows = transactions.map(t => [
@@ -32,13 +32,8 @@ export async function exportAsCSV() {
   const fileUri = FileSystem.documentDirectory + filename;
 
   await FileSystem.writeAsStringAsync(fileUri, csvContent, {
-    encoding: FileSystem.EncodingType.UTF8,
+    encoding: 'utf8',
   });
-
-  const canShare = await Sharing.isAvailableAsync();
-  if (!canShare) {
-    throw new Error('Sharing is not available on this device');
-  }
 
   await Sharing.shareAsync(fileUri, {
     mimeType: 'text/csv',
@@ -65,11 +60,8 @@ export async function exportAsJSON() {
   const fileUri = FileSystem.documentDirectory + filename;
 
   await FileSystem.writeAsStringAsync(fileUri, json, {
-    encoding: FileSystem.EncodingType.UTF8,
+    encoding: 'utf8',
   });
-
-  const canShare = await Sharing.isAvailableAsync();
-  if (!canShare) throw new Error('Sharing is not available on this device');
 
   await Sharing.shareAsync(fileUri, {
     mimeType: 'application/json',
@@ -80,7 +72,7 @@ export async function exportAsJSON() {
 
 export async function importFromJSON(fileUri) {
   const raw = await FileSystem.readAsStringAsync(fileUri, {
-    encoding: FileSystem.EncodingType.UTF8,
+    encoding: 'utf8',
   });
   const payload = JSON.parse(raw);
 

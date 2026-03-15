@@ -23,12 +23,23 @@ export const CATEGORY_EMOJI = {
   'Other Income': '💵',
 };
 
+// customEmojiMap and customColorMap can be set at runtime from the DB
+export let customEmojiMap = {};
+export let customColorMap = {};
+
+export function setCustomCategoryMaps(emojiMap, colorMap) {
+  customEmojiMap = emojiMap;
+  customColorMap = colorMap;
+}
+
 export default function CategoryIcon({ category, size = 44 }) {
-  const bg = (CATEGORY_COLORS[category] || '#B0B0B0') + '22';
+  const emoji = customEmojiMap[category] || CATEGORY_EMOJI[category] || '💳';
+  const colorBase = customColorMap[category] || CATEGORY_COLORS[category] || '#B0B0B0';
+  const bg = colorBase + '22';
   const borderRadius = Math.round(size * 0.32);
   return (
     <View style={[styles.wrap, { width: size, height: size, borderRadius, backgroundColor: bg }]}>
-      <Text style={{ fontSize: Math.round(size * 0.45) }}>{CATEGORY_EMOJI[category] || '💳'}</Text>
+      <Text style={{ fontSize: Math.round(size * 0.45) }}>{emoji}</Text>
     </View>
   );
 }

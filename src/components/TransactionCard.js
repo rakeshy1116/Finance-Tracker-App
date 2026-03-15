@@ -1,41 +1,78 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 import CategoryIcon from './CategoryIcon';
 import { formatCurrency, formatDate } from '../utils/helpers';
 import { THEME } from '../utils/constants';
 
-export default function TransactionCard({ item, onDelete, onEdit }) {
+export default function TransactionCard({ item, onDelete, onEdit, onDuplicate }) {
+  const swipeableRef = useRef(null);
+
+  const renderRightActions = (progress, dragX) => {
+    const scale = dragX.interpolate({
+      inputRange: [-80, 0],
+      outputRange: [1, 0],
+      extrapolate: 'clamp',
+    });
+    return (
+      <TouchableOpacity
+        style={styles.deleteAction}
+        onPress={() => {
+          swipeableRef.current?.close();
+          onDelete && onDelete(item.id);
+        }}
+        activeOpacity={0.8}
+      >
+        <Animated.Text style={[styles.deleteActionText, { transform: [{ scale }] }]}>🗑</Animated.Text>
+        <Animated.Text style={[styles.deleteActionLabel, { transform: [{ scale }] }]}>Delete</Animated.Text>
+      </TouchableOpacity>
+    );
+  };
+
   return (
-    <View style={styles.card}>
-      <CategoryIcon category={item.category} size={46} />
-      <View style={styles.info}>
-        <View style={styles.topRow}>
-          <Text style={styles.category}>{item.category}</Text>
-          {item.recurring === 1 && <Text style={styles.recurringBadge}>🔁</Text>}
+    <Swipeable
+      ref={swipeableRef}
+      renderRightActions={onDelete ? renderRightActions : null}
+      rightThreshold={40}
+      friction={2}
+      overshootRight={false}
+    >
+      <View style={styles.card}>
+        <CategoryIcon category={item.category} size={46} />
+        <View style={styles.info}>
+          <View style={styles.topRow}>
+            <Text style={styles.category}>{item.category}</Text>
+            {item.recurring === 1 && <Text style={styles.recurringBadge}>🔁</Text>}
+          </View>
+          {item.description ? (
+            <Text style={styles.desc} numberOfLines={1}>{item.description}</Text>
+          ) : null}
+          <Text style={styles.date}>{formatDate(item.date)}</Text>
         </View>
-        {item.description ? (
-          <Text style={styles.desc} numberOfLines={1}>{item.description}</Text>
-        ) : null}
-        <Text style={styles.date}>{formatDate(item.date)}</Text>
-      </View>
-      <View style={styles.right}>
-        <Text style={[styles.amount, { color: item.type === 'income' ? '#22C55E' : '#EF4444' }]}>
-          {item.type === 'income' ? '+' : '-'}{formatCurrency(item.amount)}
-        </Text>
-        <View style={styles.actions}>
-          {onEdit && (
-            <TouchableOpacity onPress={() => onEdit(item)} style={styles.actionBtn}>
-              <Text style={styles.editIcon}>✏️</Text>
-            </TouchableOpacity>
-          )}
-          {onDelete && (
-            <TouchableOpacity onPress={() => onDelete(item.id)} style={styles.actionBtn}>
-              <Text style={styles.delIcon}>🗑</Text>
-            </TouchableOpacity>
-          )}
+        <View style={styles.right}>
+          <Text style={[styles.amount, { color: item.type === 'income' ? '#22C55E' : '#EF4444' }]}>
+            {item.type === 'income' ? '+' : '-'}{formatCurrency(item.amount)}
+          </Text>
+          <View style={styles.actions}>
+            {onDuplicate && (
+              <TouchableOpacity onPress={() => onDuplicate(item.id)} style={styles.actionBtn}>
+                <Text style={styles.dupIcon}>📋</Text>
+              </TouchableOpacity>
+            )}
+            {onEdit && (
+              <TouchableOpacity onPress={() => onEdit(item)} style={styles.actionBtn}>
+                <Text style={styles.editIcon}>✏️</Text>
+              </TouchableOpacity>
+            )}
+            {onDelete && (
+              <TouchableOpacity onPress={() => onDelete(item.id)} style={styles.actionBtn}>
+                <Text style={styles.delIcon}>🗑</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
       </View>
-    </View>
+    </Swipeable>
   );
 }
 
@@ -62,6 +99,18 @@ const styles = StyleSheet.create({
   amount: { fontSize: 15, fontWeight: '800' },
   actions: { flexDirection: 'row', gap: 4 },
   actionBtn: { padding: 2 },
+  dupIcon: { fontSize: 13 },
   editIcon: { fontSize: 14 },
   delIcon: { fontSize: 15 },
+  deleteAction: {
+    backgroundColor: '#EF4444',
+    borderRadius: 18,
+    marginLeft: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    minWidth: 72,
+  },
+  deleteActionText: { fontSize: 22, color: '#FFFFFF' },
+  deleteActionLabel: { fontSize: 11, fontWeight: '700', color: '#FFFFFF', marginTop: 2 },
 });
