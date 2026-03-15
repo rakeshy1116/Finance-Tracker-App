@@ -204,8 +204,8 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: THEME.background },
   monthSelector: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    paddingVertical: 10, backgroundColor: THEME.surface,
-    borderBottomWidth: 1, borderBottomColor: '#F3F4F6',
+    paddingVertical: 10, backgroundColor: '#EFF9F8',
+    borderBottomWidth: 1, borderBottomColor: '#D0F0EC',
   },
   monthArrow: { padding: 12 },
   monthArrowText: { fontSize: 26, color: THEME.primary, fontWeight: '600' },
@@ -251,14 +251,14 @@ const styles = StyleSheet.create({
   catChip: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 14, paddingVertical: 8, borderRadius: 14, marginRight: 8,
-    backgroundColor: '#F3F4F6', borderWidth: 1.5, borderColor: 'transparent',
+    backgroundColor: '#EFF9F8', borderWidth: 1.5, borderColor: '#D0F0EC',
   },
   catChipActive: { backgroundColor: '#CCFBF1', borderColor: THEME.primary },
   catChipText: { fontSize: 13, color: THEME.textSecondary, fontWeight: '500' },
   catChipTextActive: { color: THEME.primary, fontWeight: '700' },
   amountInputWrap: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: '#F9FAFB',
-    borderRadius: 14, borderWidth: 1.5, borderColor: '#E5E7EB', paddingHorizontal: 16, marginBottom: 24,
+    flexDirection: 'row', alignItems: 'center', backgroundColor: '#F0FDFA',
+    borderRadius: 14, borderWidth: 1.5, borderColor: '#D0F0EC', paddingHorizontal: 16, marginBottom: 24,
   },
   dollarSign: { fontSize: 24, fontWeight: '700', color: THEME.textSecondary, marginRight: 4 },
   amountField: { flex: 1, fontSize: 32, fontWeight: '800', color: THEME.textPrimary, paddingVertical: 14 },

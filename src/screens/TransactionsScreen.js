@@ -4,6 +4,7 @@ import {
   Alert, RefreshControl, TextInput, ActivityIndicator,
   ScrollView, Platform,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -211,40 +212,53 @@ export default function TransactionsScreen({ navigation }) {
   return (
     <SafeAreaView edges={['top']} style={styles.safeTop}>
       <View style={styles.container}>
-        {/* Search + Sort bar */}
-        <View style={styles.searchRow}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search by category or note…"
-            placeholderTextColor={THEME.textSecondary}
-            value={search}
-            onChangeText={setSearch}
-            clearButtonMode="while-editing"
-          />
-          <TouchableOpacity style={styles.sortBtn} onPress={cycleSortBy}>
-            <Text style={styles.sortBtnText}>{sortLabel}</Text>
-          </TouchableOpacity>
-        </View>
+        {/* Gradient Header */}
+        <LinearGradient
+          colors={['#0F766E', '#0D9488']}
+          start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+          style={styles.header}
+        >
+          <View style={styles.headerRow}>
+            <Text style={styles.headerTitle}>History</Text>
+            <Text style={styles.headerCount}>{totalCount} transactions</Text>
+          </View>
+          {/* Search + Sort inside header */}
+          <View style={styles.searchRow}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search by category or note…"
+              placeholderTextColor="rgba(255,255,255,0.6)"
+              value={search}
+              onChangeText={setSearch}
+              clearButtonMode="while-editing"
+            />
+            <TouchableOpacity style={styles.sortBtn} onPress={cycleSortBy}>
+              <Text style={styles.sortBtnText}>{sortLabel}</Text>
+            </TouchableOpacity>
+          </View>
+        </LinearGradient>
 
-        {/* Amount filter row */}
-        <View style={styles.amountFilterRow}>
-          <Text style={styles.amountFilterLabel}>$</Text>
-          <TextInput
-            style={styles.amountFilterInput}
-            placeholder=">50 or <200 or exact"
-            placeholderTextColor={THEME.textSecondary}
-            value={amountFilter}
-            onChangeText={v => { setAmountFilter(v); setPage(0); }}
-            keyboardType="default"
-            clearButtonMode="while-editing"
-          />
-          <TouchableOpacity
-            style={[styles.dateRangeBtn, showDateRange && styles.dateRangeBtnActive]}
-            onPress={() => setShowDateRange(v => !v)}
-          >
-            <Text style={[styles.dateRangeBtnText, showDateRange && styles.dateRangeBtnTextActive]}>📅 Range</Text>
-          </TouchableOpacity>
-        </View>
+        {/* Filter panel — white background below header */}
+        <View style={styles.filterPanel}>
+          {/* Amount + Date range row */}
+          <View style={styles.amountFilterRow}>
+            <Text style={styles.amountFilterLabel}>$</Text>
+            <TextInput
+              style={styles.amountFilterInput}
+              placeholder=">50 or <200 or exact"
+              placeholderTextColor={THEME.textSecondary}
+              value={amountFilter}
+              onChangeText={v => { setAmountFilter(v); setPage(0); }}
+              keyboardType="default"
+              clearButtonMode="while-editing"
+            />
+            <TouchableOpacity
+              style={[styles.dateRangeBtn, showDateRange && styles.dateRangeBtnActive]}
+              onPress={() => setShowDateRange(v => !v)}
+            >
+              <Text style={[styles.dateRangeBtnText, showDateRange && styles.dateRangeBtnTextActive]}>📅 Range</Text>
+            </TouchableOpacity>
+          </View>
 
         {/* Date Range Picker */}
         {showDateRange && (
@@ -301,46 +315,45 @@ export default function TransactionsScreen({ navigation }) {
           </TouchableOpacity>
         )}
 
-        {/* Account filter chips */}
-        {accounts.length > 0 && (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.accountFilterScroll}
-            contentContainerStyle={styles.accountFilterContent}
-          >
-            <TouchableOpacity
-              style={[styles.accountFilterChip, selectedAccount === null && styles.accountFilterChipActive]}
-              onPress={() => setSelectedAccount(null)}
+          {/* Account filter chips */}
+          {accounts.length > 0 && (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.accountFilterContent}
             >
-              <Text style={[styles.accountFilterText, selectedAccount === null && styles.accountFilterTextActive]}>All</Text>
-            </TouchableOpacity>
-            {accounts.map(acc => (
               <TouchableOpacity
-                key={acc.id}
-                style={[styles.accountFilterChip, selectedAccount === acc.id && styles.accountFilterChipActive]}
-                onPress={() => setSelectedAccount(acc.id === selectedAccount ? null : acc.id)}
+                style={[styles.accountFilterChip, selectedAccount === null && styles.accountFilterChipActive]}
+                onPress={() => setSelectedAccount(null)}
               >
-                <Text style={styles.accountFilterIcon}>{acc.icon}</Text>
-                <Text style={[styles.accountFilterText, selectedAccount === acc.id && styles.accountFilterTextActive]}>{acc.name}</Text>
+                <Text style={[styles.accountFilterText, selectedAccount === null && styles.accountFilterTextActive]}>All</Text>
+              </TouchableOpacity>
+              {accounts.map(acc => (
+                <TouchableOpacity
+                  key={acc.id}
+                  style={[styles.accountFilterChip, selectedAccount === acc.id && styles.accountFilterChipActive]}
+                  onPress={() => setSelectedAccount(acc.id === selectedAccount ? null : acc.id)}
+                >
+                  <Text style={styles.accountFilterIcon}>{acc.icon}</Text>
+                  <Text style={[styles.accountFilterText, selectedAccount === acc.id && styles.accountFilterTextActive]}>{acc.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          )}
+
+          {/* Filter chips row */}
+          <View style={styles.filterBar}>
+            {FILTERS.map(f => (
+              <TouchableOpacity
+                key={f}
+                style={[styles.filterBtn, filter === f && styles.filterBtnActive]}
+                onPress={() => setFilter(f)}
+              >
+                <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>{f}</Text>
               </TouchableOpacity>
             ))}
-          </ScrollView>
-        )}
-
-        {/* Filter chips + count */}
-        <View style={styles.filterBar}>
-          {FILTERS.map(f => (
-            <TouchableOpacity
-              key={f}
-              style={[styles.filterBtn, filter === f && styles.filterBtnActive]}
-              onPress={() => setFilter(f)}
-            >
-              <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>{f}</Text>
-            </TouchableOpacity>
-          ))}
-          <Text style={styles.count}>{totalCount} items</Text>
-        </View>
+          </View>
+        </View>{/* end filterPanel */}
 
         <FlatList
           data={transactions}
@@ -391,40 +404,51 @@ export default function TransactionsScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safeTop: { flex: 1, backgroundColor: THEME.surface },
+  safeTop: { flex: 1, backgroundColor: '#0F766E' },
   container: { flex: 1, backgroundColor: THEME.background },
-  searchRow: {
-    flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16,
-    paddingTop: 12, paddingBottom: 8, backgroundColor: THEME.surface, gap: 8,
-  },
+  // ── Header ──────────────────────────────────────────────────────────────────
+  header: { paddingHorizontal: 20, paddingTop: 14, paddingBottom: 16 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+  headerTitle: { color: '#FFFFFF', fontSize: 24, fontWeight: '800' },
+  headerCount: { color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: '500' },
+  searchRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   searchInput: {
-    flex: 1, backgroundColor: '#F3F4F6', borderRadius: 12,
-    paddingHorizontal: 14, paddingVertical: 9, fontSize: 14, color: THEME.textPrimary,
+    flex: 1, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 12,
+    paddingHorizontal: 14, paddingVertical: 9, fontSize: 14,
+    color: '#FFFFFF',
   },
-  sortBtn: { backgroundColor: '#F3F4F6', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 9 },
-  sortBtnText: { fontSize: 14, fontWeight: '700', color: THEME.textPrimary },
+  sortBtn: { backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 9 },
+  sortBtnText: { fontSize: 14, fontWeight: '700', color: '#FFFFFF' },
+  // ── Filter panel ────────────────────────────────────────────────────────────
+  filterPanel: {
+    backgroundColor: '#EFF9F8',
+    borderBottomWidth: 1, borderBottomColor: '#D0F0EC',
+    paddingBottom: 4,
+  },
   amountFilterRow: {
     flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16,
-    paddingBottom: 8, backgroundColor: THEME.surface, gap: 8,
+    paddingTop: 10, paddingBottom: 6, gap: 8,
   },
   amountFilterLabel: { fontSize: 16, fontWeight: '700', color: THEME.textSecondary },
   amountFilterInput: {
-    flex: 1, backgroundColor: '#F3F4F6', borderRadius: 12,
-    paddingHorizontal: 14, paddingVertical: 8, fontSize: 13, color: THEME.textPrimary,
+    flex: 1, backgroundColor: '#FFFFFF', borderRadius: 12,
+    paddingHorizontal: 14, paddingVertical: 7, fontSize: 13, color: THEME.textPrimary,
+    borderWidth: 1, borderColor: '#D0F0EC',
   },
   dateRangeBtn: {
-    backgroundColor: '#F3F4F6', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8,
+    backgroundColor: '#FFFFFF', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 7,
+    borderWidth: 1, borderColor: '#D0F0EC',
   },
-  dateRangeBtnActive: { backgroundColor: THEME.primaryLight },
+  dateRangeBtnActive: { backgroundColor: '#CCFBF1' },
   dateRangeBtnText: { fontSize: 12, fontWeight: '700', color: THEME.textSecondary },
   dateRangeBtnTextActive: { color: THEME.primary },
   dateRangeRow: {
     flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16,
-    paddingBottom: 8, backgroundColor: THEME.surface, gap: 8,
+    paddingBottom: 8, gap: 8,
   },
   datePill: {
-    backgroundColor: '#F3F4F6', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 7,
-    alignItems: 'center',
+    backgroundColor: '#FFFFFF', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 6,
+    alignItems: 'center', borderWidth: 1, borderColor: '#D0F0EC',
   },
   datePillLabel: { fontSize: 10, color: THEME.textSecondary, fontWeight: '600' },
   datePillValue: { fontSize: 13, fontWeight: '700', color: THEME.textPrimary },
@@ -436,26 +460,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 6, backgroundColor: THEME.primary, borderRadius: 10,
   },
   doneBtnText: { color: '#FFFFFF', fontWeight: '700', fontSize: 13 },
-  accountFilterScroll: { backgroundColor: THEME.surface, maxHeight: 48 },
-  accountFilterContent: { paddingHorizontal: 16, paddingBottom: 8, gap: 8, flexDirection: 'row' },
+  accountFilterContent: { paddingHorizontal: 16, paddingVertical: 6, gap: 8, flexDirection: 'row' },
   accountFilterChip: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     paddingHorizontal: 12, paddingVertical: 5, borderRadius: 20,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#D0F0EC',
   },
-  accountFilterChipActive: { backgroundColor: THEME.primaryLight },
+  accountFilterChipActive: { backgroundColor: '#CCFBF1', borderWidth: 1.5, borderColor: '#0D9488' },
   accountFilterIcon: { fontSize: 13 },
   accountFilterText: { fontSize: 12, fontWeight: '600', color: THEME.textSecondary },
   accountFilterTextActive: { color: THEME.primary },
   filterBar: {
     flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16,
-    paddingVertical: 10, backgroundColor: THEME.surface,
-    borderBottomWidth: 1, borderBottomColor: '#F3F4F6', gap: 8,
+    paddingVertical: 8, gap: 8,
   },
-  filterBtn: { paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20, backgroundColor: '#F3F4F6' },
-  filterBtnActive: { backgroundColor: THEME.primary },
+  filterBtn: { paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#D0F0EC' },
+  filterBtnActive: { backgroundColor: '#CCFBF1', borderWidth: 1.5, borderColor: '#0D9488' },
   filterText: { fontSize: 13, fontWeight: '600', color: THEME.textSecondary },
-  filterTextActive: { color: '#FFFFFF' },
+  filterTextActive: { color: '#0D9488', fontWeight: '700' },
   count: { marginLeft: 'auto', fontSize: 12, color: THEME.textSecondary, fontWeight: '500' },
   list: { padding: 16, gap: 10, paddingBottom: 160 },
   empty: { alignItems: 'center', paddingTop: 80 },

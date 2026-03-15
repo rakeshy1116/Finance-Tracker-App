@@ -135,7 +135,7 @@ export default function DashboardScreen({ navigation }) {
               <Text style={styles.sectionTitle}>Accounts</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.accountsScroll}>
                 {netWorthAccounts.map(acc => (
-                  <View key={acc.id} style={[styles.accountCard, { borderLeftColor: acc.color }]}>
+                  <View key={acc.id} style={[styles.accountCard, { borderLeftColor: acc.color, backgroundColor: acc.color + '15' }]}>
                     <Text style={styles.accountIcon}>{acc.icon}</Text>
                     <Text style={styles.accountName}>{acc.name}</Text>
                     <Text style={[styles.accountBalance, { color: acc.balance >= 0 ? '#15803D' : '#B91C1C' }]}>
@@ -148,6 +148,7 @@ export default function DashboardScreen({ navigation }) {
           )}
 
           {/* Quick Actions */}
+          <View style={styles.actionsCard}>
           <View style={styles.actions}>
             <TouchableOpacity
               style={[styles.actionBtn, { backgroundColor: '#FEE2E2' }]}
@@ -170,6 +171,7 @@ export default function DashboardScreen({ navigation }) {
               <Text style={styles.actionIcon}>📊</Text>
               <Text style={[styles.actionLabel, { color: '#0D9488' }]}>Reports</Text>
             </TouchableOpacity>
+          </View>
           </View>
 
           {/* Recent Transactions */}
@@ -199,7 +201,7 @@ export default function DashboardScreen({ navigation }) {
                     <Text style={styles.txnDate}>{formatDate(txn.date)}</Text>
                   </View>
                   <View style={styles.txnRight}>
-                    <Text style={[styles.txnAmount, { color: txn.type === 'income' ? '#22C55E' : '#EF4444' }]}>
+                    <Text style={[styles.txnAmount, { color: txn.type === 'income' ? '#059669' : '#DC2626' }]}>
                       {txn.type === 'income' ? '+' : '-'}{formatCurrency(txn.amount)}
                     </Text>
                     {txn.description ? <Text style={styles.txnDesc} numberOfLines={1}>{txn.description}</Text> : null}
@@ -242,25 +244,30 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 18, fontWeight: '700', color: THEME.textPrimary, marginBottom: 10 },
   accountsScroll: { marginBottom: 4 },
   accountCard: {
-    backgroundColor: THEME.surface, borderRadius: 16, padding: 14, marginRight: 10,
-    minWidth: 110, borderLeftWidth: 4, shadowColor: '#000',
-    shadowOpacity: 0.05, shadowOffset: { width: 0, height: 2 }, shadowRadius: 6, elevation: 2,
+    borderRadius: 16, padding: 14, marginRight: 10,
+    minWidth: 110, borderLeftWidth: 4, shadowColor: '#0D9488',
+    shadowOpacity: 0.08, shadowOffset: { width: 0, height: 2 }, shadowRadius: 6, elevation: 2,
   },
   accountIcon: { fontSize: 22, marginBottom: 4 },
   accountName: { fontSize: 12, color: THEME.textSecondary, fontWeight: '600', marginBottom: 4 },
   accountBalance: { fontSize: 15, fontWeight: '800' },
-  actions: { flexDirection: 'row', margin: 20, gap: 10 },
+  actionsCard: {
+    marginHorizontal: 20, marginTop: 14, backgroundColor: '#FFFFFF',
+    borderRadius: 20, padding: 12,
+    shadowColor: '#0D9488', shadowOpacity: 0.07, shadowOffset: { width: 0, height: 2 }, shadowRadius: 8, elevation: 2,
+  },
+  actions: { flexDirection: 'row', gap: 10 },
   actionBtn: { flex: 1, alignItems: 'center', paddingVertical: 16, borderRadius: 18, gap: 6 },
   actionIcon: { fontSize: 22 },
   actionLabel: { fontSize: 12, fontWeight: '700' },
-  recentSection: { marginHorizontal: 20, backgroundColor: THEME.surface, borderRadius: 20, padding: 20, shadowColor: '#000', shadowOpacity: 0.06, shadowOffset: { width: 0, height: 4 }, shadowRadius: 12, elevation: 3 },
+  recentSection: { marginHorizontal: 20, backgroundColor: THEME.surface, borderRadius: 20, padding: 20, borderWidth: 1, borderColor: '#E8F5F3' },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   seeAll: { fontSize: 13, color: THEME.primary, fontWeight: '600' },
   emptyBox: { alignItems: 'center', paddingVertical: 28 },
   emptyEmoji: { fontSize: 40, marginBottom: 10 },
   emptyText: { fontSize: 15, fontWeight: '600', color: THEME.textPrimary },
   emptySubText: { fontSize: 13, color: THEME.textSecondary, marginTop: 4, textAlign: 'center' },
-  txnRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#F3F4F6', gap: 12 },
+  txnRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#E8F5F3', gap: 12 },
   txnInfo: { flex: 1 },
   txnTopRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   txnCategory: { fontSize: 15, fontWeight: '600', color: THEME.textPrimary },

@@ -11,7 +11,7 @@ export default function BudgetCard({ budget, onDelete }) {
   const barColor = over ? '#EF4444' : pct > 75 ? '#F59E0B' : '#22C55E';
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { borderTopColor: barColor }]}>
       <View style={styles.header}>
         <View style={styles.left}>
           <CategoryIcon category={category} size={44} />
@@ -20,15 +20,15 @@ export default function BudgetCard({ budget, onDelete }) {
             <Text style={styles.sub}>{formatCurrency(spent)} of {formatCurrency(amount)}</Text>
           </View>
         </View>
-        <View style={styles.right}>
-          <Text style={[styles.pct, { color: barColor }]}>{Math.round(pct)}%</Text>
-          <TouchableOpacity onPress={() => onDelete(budget.id)}>
-            <Text style={styles.deleteIcon}>🗑</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity onPress={() => onDelete(budget.id)} style={styles.right}>
+          <Text style={styles.deleteIcon}>🗑</Text>
+        </TouchableOpacity>
       </View>
-      <View style={styles.progressBg}>
-        <View style={[styles.progressFill, { width: `${pct}%`, backgroundColor: barColor }]} />
+      <View style={styles.progressWrapper}>
+        <View style={styles.progressBg}>
+          <View style={[styles.progressFill, { width: `${pct}%`, backgroundColor: barColor }]} />
+        </View>
+        <Text style={[styles.progressPct, { color: barColor }]}>{Math.round(pct)}%</Text>
       </View>
       {over
         ? <Text style={styles.overText}>⚠️ Over by {formatCurrency(spent - amount)}</Text>
@@ -40,12 +40,13 @@ export default function BudgetCard({ budget, onDelete }) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: THEME.surface,
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
+    borderTopWidth: 3,
+    shadowColor: '#0D9488',
+    shadowOpacity: 0.08,
     shadowOffset: { width: 0, height: 3 },
     shadowRadius: 10,
     elevation: 3,
@@ -58,8 +59,10 @@ const styles = StyleSheet.create({
   right: { alignItems: 'flex-end', gap: 4 },
   pct: { fontSize: 16, fontWeight: '800' },
   deleteIcon: { fontSize: 16 },
-  progressBg: { height: 8, backgroundColor: '#F3F4F6', borderRadius: 4, overflow: 'hidden', marginBottom: 8 },
+  progressWrapper: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
+  progressBg: { flex: 1, height: 8, backgroundColor: '#E8F5F3', borderRadius: 4, overflow: 'hidden' },
   progressFill: { height: '100%', borderRadius: 4 },
-  overText: { fontSize: 12, color: '#EF4444', fontWeight: '600' },
-  remainText: { fontSize: 12, color: '#22C55E', fontWeight: '600' },
+  progressPct: { fontSize: 11, fontWeight: '700', minWidth: 32, textAlign: 'right' },
+  overText: { fontSize: 12, color: '#DC2626', fontWeight: '600' },
+  remainText: { fontSize: 12, color: '#059669', fontWeight: '600' },
 });

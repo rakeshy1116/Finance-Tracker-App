@@ -6,7 +6,7 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { addTransaction, updateTransaction, getCustomCategories, getAccounts } from '../db/database';
-import { CATEGORIES, INCOME_CATEGORIES, THEME } from '../utils/constants';
+import { CATEGORIES, INCOME_CATEGORIES, THEME, CATEGORY_COLORS } from '../utils/constants';
 import { todayISO } from '../utils/helpers';
 import { useAppContext } from '../utils/AppContext';
 import { CATEGORY_EMOJI, customEmojiMap, customColorMap } from '../components/CategoryIcon';
@@ -217,16 +217,20 @@ export default function AddTransactionScreen({ navigation, route }) {
           <View style={styles.field}>
             <Text style={styles.fieldLabel}>🏷️  Category</Text>
             <View style={styles.categoryGrid}>
-              {allCategories.map(cat => (
-                <TouchableOpacity
-                  key={cat.name}
-                  style={[styles.catChip, category === cat.name && styles.catChipActive]}
-                  onPress={() => setCategory(cat.name)}
-                >
-                  <Text style={styles.catEmoji}>{getCatEmoji(cat)}</Text>
-                  <Text style={[styles.catLabel, category === cat.name && styles.catLabelActive]}>{cat.name}</Text>
-                </TouchableOpacity>
-              ))}
+              {allCategories.map(cat => {
+                const catColor = cat.color || customColorMap[cat.name] || CATEGORY_COLORS[cat.name] || THEME.primary;
+                const isActive = category === cat.name;
+                return (
+                  <TouchableOpacity
+                    key={cat.name}
+                    style={[styles.catChip, isActive && { backgroundColor: catColor, borderColor: catColor }]}
+                    onPress={() => setCategory(cat.name)}
+                  >
+                    <Text style={styles.catEmoji}>{getCatEmoji(cat)}</Text>
+                    <Text style={[styles.catLabel, isActive && styles.catLabelActive]}>{cat.name}</Text>
+                  </TouchableOpacity>
+                );
+              })}
               <TouchableOpacity
                 style={styles.manageCatChip}
                 onPress={() => navigation.navigate('ManageCategories')}
@@ -261,7 +265,7 @@ export default function AddTransactionScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: THEME.background },
   toggleRow: {
-    flexDirection: 'row', margin: 16, backgroundColor: '#F3F4F6',
+    flexDirection: 'row', margin: 16, backgroundColor: '#E8F5F3',
     borderRadius: 16, padding: 4,
   },
   toggleBtn: { flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: 'center' },
@@ -279,8 +283,8 @@ const styles = StyleSheet.create({
   field: { marginBottom: 20 },
   fieldLabel: { fontSize: 13, fontWeight: '700', color: THEME.textSecondary, marginBottom: 8, letterSpacing: 0.3 },
   input: {
-    backgroundColor: THEME.surface, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 13,
-    fontSize: 15, color: THEME.textPrimary, borderWidth: 1, borderColor: '#E5E7EB',
+    backgroundColor: '#F0FDFA', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 13,
+    fontSize: 15, color: THEME.textPrimary, borderWidth: 1, borderColor: '#D0F0EC',
   },
   dateText: { fontSize: 15, color: THEME.textPrimary },
   doneBtn: {
@@ -292,7 +296,7 @@ const styles = StyleSheet.create({
   accountChip: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 14, paddingVertical: 9, borderRadius: 14,
-    backgroundColor: THEME.surface, borderWidth: 1.5, borderColor: '#E5E7EB',
+    backgroundColor: '#F0FDFA', borderWidth: 1.5, borderColor: '#D0F0EC',
   },
   accountChipActive: { backgroundColor: '#CCFBF1', borderColor: THEME.primary },
   accountChipIcon: { fontSize: 16 },
@@ -300,20 +304,19 @@ const styles = StyleSheet.create({
   accountChipTextActive: { color: THEME.primary, fontWeight: '700' },
   switchRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    backgroundColor: THEME.surface, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12,
-    borderWidth: 1, borderColor: '#E5E7EB',
+    backgroundColor: '#F0FDFA', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12,
+    borderWidth: 1, borderColor: '#D0F0EC',
   },
   switchDesc: { fontSize: 14, color: THEME.textSecondary, flex: 1, marginRight: 12 },
   categoryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   catChip: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12,
-    backgroundColor: THEME.surface, borderWidth: 1.5, borderColor: '#E5E7EB',
+    backgroundColor: '#F0FDFA', borderWidth: 1.5, borderColor: '#D0F0EC',
   },
-  catChipActive: { backgroundColor: '#CCFBF1', borderColor: THEME.primary },
   catEmoji: { fontSize: 14 },
   catLabel: { fontSize: 12, color: THEME.textSecondary, fontWeight: '500' },
-  catLabelActive: { color: THEME.primary, fontWeight: '700' },
+  catLabelActive: { color: '#FFFFFF', fontWeight: '700' },
   manageCatChip: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12,

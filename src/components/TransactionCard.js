@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native
 import { Swipeable } from 'react-native-gesture-handler';
 import CategoryIcon from './CategoryIcon';
 import { formatCurrency, formatDate } from '../utils/helpers';
-import { THEME } from '../utils/constants';
+import { THEME, CATEGORY_COLORS } from '../utils/constants';
 
 export default function TransactionCard({ item, onDelete, onEdit, onDuplicate }) {
   const swipeableRef = useRef(null);
@@ -37,7 +37,7 @@ export default function TransactionCard({ item, onDelete, onEdit, onDuplicate })
       friction={2}
       overshootRight={false}
     >
-      <View style={styles.card}>
+      <View style={[styles.card, { borderLeftColor: CATEGORY_COLORS[item.category] || '#94A3B8' }]}>
         <CategoryIcon category={item.category} size={46} />
         <View style={styles.info}>
           <View style={styles.topRow}>
@@ -50,7 +50,7 @@ export default function TransactionCard({ item, onDelete, onEdit, onDuplicate })
           <Text style={styles.date}>{formatDate(item.date)}</Text>
         </View>
         <View style={styles.right}>
-          <Text style={[styles.amount, { color: item.type === 'income' ? '#22C55E' : '#EF4444' }]}>
+          <Text style={[styles.amount, { color: item.type === 'income' ? '#059669' : '#DC2626' }]}>
             {item.type === 'income' ? '+' : '-'}{formatCurrency(item.amount)}
           </Text>
           <View style={styles.actions}>
@@ -80,11 +80,12 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: THEME.surface,
+    backgroundColor: '#FFFFFF',
     borderRadius: 18,
     padding: 14,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
+    borderLeftWidth: 3,
+    shadowColor: '#0D9488',
+    shadowOpacity: 0.07,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 8,
     elevation: 2,
@@ -98,7 +99,7 @@ const styles = StyleSheet.create({
   right: { alignItems: 'flex-end', gap: 4 },
   amount: { fontSize: 15, fontWeight: '800' },
   actions: { flexDirection: 'row', gap: 4 },
-  actionBtn: { padding: 2 },
+  actionBtn: { padding: 4, backgroundColor: '#F0F9F8', borderRadius: 8 },
   dupIcon: { fontSize: 13 },
   editIcon: { fontSize: 14 },
   delIcon: { fontSize: 15 },

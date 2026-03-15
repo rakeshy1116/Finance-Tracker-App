@@ -48,7 +48,7 @@ function GoalCard({ goal, onContribute, onDelete }) {
       friction={2}
       overshootRight={false}
     >
-      <TouchableOpacity style={styles.goalCard} onPress={() => onContribute(goal)} activeOpacity={0.85}>
+      <TouchableOpacity style={[styles.goalCard, { backgroundColor: (goal.color || THEME.primary) + '15' }]} onPress={() => onContribute(goal)} activeOpacity={0.85}>
         <View style={styles.goalHeader}>
           <View style={[styles.goalIconBg, { backgroundColor: (goal.color || THEME.primary) + '22' }]}>
             <Text style={styles.goalIconEmoji}>{goal.emoji}</Text>
@@ -351,8 +351,8 @@ const styles = StyleSheet.create({
   heroProgressFill: { height: '100%', borderRadius: 3, backgroundColor: '#FFFFFF' },
   content: { padding: 16, gap: 12 },
   goalCard: {
-    backgroundColor: THEME.surface, borderRadius: 20, padding: 16,
-    shadowColor: '#000', shadowOpacity: 0.06, shadowOffset: { width: 0, height: 3 }, shadowRadius: 10, elevation: 3,
+    borderRadius: 20, padding: 16,
+    shadowColor: '#0D9488', shadowOpacity: 0.08, shadowOffset: { width: 0, height: 3 }, shadowRadius: 10, elevation: 3,
   },
   goalHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 12 },
   goalIconBg: { width: 48, height: 48, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
   goalAmounts: { alignItems: 'flex-end' },
   goalSaved: { fontSize: 16, fontWeight: '800' },
   goalTarget: { fontSize: 12, color: THEME.textSecondary, fontWeight: '500' },
-  progressBg: { height: 8, backgroundColor: '#F3F4F6', borderRadius: 4, overflow: 'hidden', marginBottom: 8 },
+  progressBg: { height: 8, backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: 4, overflow: 'hidden', marginBottom: 8 },
   progressFill: { height: '100%', borderRadius: 4 },
   goalFooter: { flexDirection: 'row', alignItems: 'center' },
   goalPct: { fontSize: 12, color: THEME.textSecondary, fontWeight: '600' },
@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
   sheetTitle: { fontSize: 20, fontWeight: '800', color: THEME.textPrimary, marginBottom: 16 },
   fieldLabel: { fontSize: 13, fontWeight: '700', color: THEME.textSecondary, marginBottom: 8, letterSpacing: 0.3 },
   inputField: {
-    backgroundColor: '#F9FAFB', borderRadius: 14, borderWidth: 1.5, borderColor: '#E5E7EB',
+    backgroundColor: '#F0FDFA', borderRadius: 14, borderWidth: 1.5, borderColor: '#D0F0EC',
     paddingHorizontal: 16, paddingVertical: 12, fontSize: 15, color: THEME.textPrimary, marginBottom: 16,
   },
   doneBtn: { alignSelf: 'flex-end', paddingHorizontal: 16, paddingVertical: 6, backgroundColor: THEME.primary, borderRadius: 10, marginBottom: 8 },

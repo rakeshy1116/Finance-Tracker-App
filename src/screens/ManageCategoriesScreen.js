@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
   builtinGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   builtinChip: {
     paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#EFF9F8', borderWidth: 1, borderColor: '#D0F0EC',
   },
   builtinText: { fontSize: 12, color: THEME.textSecondary, fontWeight: '500' },
   // Modal
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
   typeBtnTextActive: { color: '#FFFFFF' },
   fieldLabel: { fontSize: 13, fontWeight: '700', color: THEME.textSecondary, marginBottom: 8, letterSpacing: 0.3 },
   nameInput: {
-    backgroundColor: '#F9FAFB', borderRadius: 14, borderWidth: 1.5, borderColor: '#E5E7EB',
+    backgroundColor: '#F0FDFA', borderRadius: 14, borderWidth: 1.5, borderColor: '#D0F0EC',
     paddingHorizontal: 16, paddingVertical: 12, fontSize: 16, color: THEME.textPrimary, marginBottom: 16,
   },
   emojiScroll: { marginBottom: 16 },
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
   colorGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 },
   colorBtn: { width: 36, height: 36, borderRadius: 18 },
   colorBtnSelected: { borderWidth: 3, borderColor: THEME.textPrimary },
-  preview: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#F9FAFB', borderRadius: 16, padding: 16, marginBottom: 20 },
+  preview: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#F0FDFA', borderRadius: 16, padding: 16, marginBottom: 20, borderWidth: 1, borderColor: '#D0F0EC' },
   previewIcon: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   previewEmoji: { fontSize: 22 },
   previewName: { fontSize: 16, fontWeight: '700', color: THEME.textPrimary },

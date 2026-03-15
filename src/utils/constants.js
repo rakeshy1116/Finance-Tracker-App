@@ -47,9 +47,11 @@ export const THEME = {
   success:        '#10B981',   // emerald-500
   danger:         '#EF4444',   // red-500
   warning:        '#F59E0B',   // amber-500
-  background:     '#F0FDFA',   // teal-50
+  background:     '#EFF9F8',   // slightly deeper teal-50
   surface:        '#FFFFFF',
-  textPrimary:    '#134E4A',   // teal-900
-  textSecondary:  '#6B7280',   // gray-500
-  border:         '#CCFBF1',   // teal-100
+  surfaceElevated: '#F8FFFE',  // cards on background
+  textPrimary:    '#0F3D38',   // darker teal-900 for more contrast
+  textSecondary:  '#5C7A77',   // teal-tinted grey
+  border:         '#D0F0EC',   // slightly darker teal-100
+  divider:        '#E8F5F3',   // subtle teal divider
 };

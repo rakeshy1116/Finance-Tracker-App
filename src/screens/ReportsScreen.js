@@ -303,7 +303,7 @@ export default function ReportsScreen() {
                 <View style={styles.compCell}><DeltaArrow curr={summary.expense} prev={lastSummary.expense} higherIsGood={false} /></View>
               </View>
 
-              <View style={[styles.compRow, { backgroundColor: '#F0F9FF', borderRadius: 10, marginTop: 4 }]}>
+              <View style={[styles.compRow, { backgroundColor: '#F0FDFA', borderRadius: 10, marginTop: 4 }]}>
                 <View style={styles.compCell}><Text style={styles.compMetric}>Savings%</Text></View>
                 <View style={styles.compCell}><Text style={styles.compValueSub}>{lastSavingsRate}%</Text></View>
                 <View style={styles.compCell}><Text style={[styles.compValue, { color: THEME.primary }]}>{savingsRate}%</Text></View>
@@ -476,8 +476,9 @@ const styles = StyleSheet.create({
   heroStatValue: { fontSize: 15, fontWeight: '800', marginTop: 4 },
   content: { padding: 16, paddingBottom: 110, gap: 16 },
   card: {
-    backgroundColor: THEME.surface, borderRadius: 24, padding: 20,
-    shadowColor: '#000', shadowOpacity: 0.06, shadowOffset: { width: 0, height: 4 }, shadowRadius: 12, elevation: 3,
+    backgroundColor: '#FFFFFF', borderRadius: 24, padding: 20,
+    shadowColor: '#0D9488', shadowOpacity: 0.07, shadowOffset: { width: 0, height: 4 }, shadowRadius: 12, elevation: 3,
+    borderWidth: 1, borderColor: '#E8F5F3',
   },
   cardTitle: { fontSize: 17, fontWeight: '700', color: THEME.textPrimary, marginBottom: 16 },
   empty: { alignItems: 'center', paddingVertical: 32 },
